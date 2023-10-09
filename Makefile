@@ -60,8 +60,9 @@ c:  ## Clean
 	@rm -rf zig-out
 	@echo "Cleaned up successfully."
 
-rel version: ## Create new release
-	sh scripts/release.sh version
+VERSION ?= 0.0.0
+rel: ## Create new release
+	sh scripts/release.sh $(VERSION)
 
 # Help
 h:
