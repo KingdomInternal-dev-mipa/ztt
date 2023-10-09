@@ -61,7 +61,7 @@ c:  ## Clean
 	@echo "Cleaned up successfully."
 
 rel version: ## Create new release
-	sh scripts/release.sh {{ version }}
+	sh scripts/release.sh version
 
 # Help
 h:
