@@ -1,5 +1,6 @@
 # Variables
-RUST_TARGET_DIR = target/*/rel-opt
+ARCH ?= x86_64-unknown-linux-gnu# default to x86_64-unknown-linux-gnu if not set
+RUST_TARGET_DIR = target/$(ARCH)/rel-opt
 ZIG_TARGET_DIR = zig-out
 RUST_LIB_NAME = ztt
 ZIG_EXEC_NAME = ztt
@@ -14,7 +15,7 @@ rust_lib: ## Build Rust library
 	@echo "Rust library built successfully."
 
 zig_build: rust_lib ## Build Zig binary
-	@cp $(RUST_TARGET_DIR)/lib$(RUST_LIB_NAME).so $(BUILD_DIR)
+	@cp -r $(RUST_TARGET_DIR)/lib$(RUST_LIB_NAME).so $(BUILD_DIR)
 	@zig build
 	@echo "Zig binary built successfully."
 

@@ -111,11 +111,15 @@ jobs:
       - name: Update Rust to version 1.73.0
         run: rustup update 1.73.0
 
+      - name: Get architecture
+        id: get-arch
+        run: echo "::set-output name=arch::$(uname -m)"
+
       - name: Build Rust library
         run: cargo build --profile rel-opt
 
       - name: Build Zig executable
-        run: make all
+        run: make all ARCH=${{ steps.get-arch.outputs.arch }}
 
       # - name: Prepare release assets
       #   shell: bash
