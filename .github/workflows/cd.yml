@@ -116,7 +116,7 @@ jobs:
         run: echo "::set-output name=arch::${{ matrix.build.TARGET }}"
 
       - name: Build Rust library
-        run: cargo build --profile rel-opt
+        run: cargo build --target ${{ steps.set-arch.outputs.arch }} --profile rel-opt
 
       - name: Build Zig executable
         run: make all ARCH=${{ steps.set-arch.outputs.arch }}

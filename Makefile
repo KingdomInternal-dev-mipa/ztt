@@ -11,7 +11,7 @@ all: rust_lib zig_build run ## Default target
 
 rust_lib: ## Build Rust library
 	@mkdir -p $(BUILD_DIR)
-	@cargo build --profile rel-opt
+	@cargo build --target $(ARCH) --profile rel-opt
 	@echo "Rust library built successfully."
 
 zig_build: rust_lib ## Build Zig binary
