@@ -60,6 +60,7 @@ c:  ## Clean
 	@rm -rf zig-out
 	@echo "Cleaned up successfully."
 
+# make rel v=X.Y.Z
 rel: ## Create new release
 	sh scripts/release.sh v$(v)
 
