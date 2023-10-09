@@ -1,0 +1,174 @@
+##############################
+#                            #
+#  Copyright (c) xTekC.      #
+#  Licensed under MPL-2.0.   #
+#  See LICENSE for details.  # 
+#                            #
+##############################
+
+name: Continuous Deployment
+
+on:
+  push:
+    tags:
+      - "v*.*.*"
+
+jobs:
+  changelog:
+    name: Generate changelog
+    runs-on: ubuntu-latest
+    outputs:
+      release_body: ${{ steps.git-cliff.outputs.content }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Generate a changelog
+        uses: orhun/git-cliff-action@v1
+        id: git-cliff
+        with:
+          config: cliff.toml
+          args: --latest --strip header
+
+  publish-github:
+    name: Publish on GitHub
+    needs: changelog
+    runs-on: ${{ matrix.build.OS }}
+    strategy:
+      fail-fast: false
+      matrix:
+        build:
+          - {
+              OS: ubuntu-latest,
+              TARGET: riscv64gc-unknown-linux-gnu,
+            }
+          - {
+              OS: ubuntu-latest,
+              TARGET: riscv64gc-unknown-linux-musl,
+            }
+          - {
+              OS: ubuntu-latest,
+              TARGET: aarch64-linux-android,
+            }
+          - {
+              OS: ubuntu-latest,
+              TARGET: aarch64-unknown-linux-gnu,
+            }
+          - {
+              OS: ubuntu-latest,
+              TARGET: aarch64-unknown-linux-musl,
+            }
+          - {
+              OS: ubuntu-latest,
+              TARGET: x86_64-unknown-linux-gnu,
+            }
+          - {
+              OS: ubuntu-latest,
+              TARGET: x86_64-unknown-linux-musl,
+            }
+          # - {
+          #     OS: ubuntu-latest,
+          #     TARGET: x86_64-unknown-freebsd,
+          #   }
+          # - {
+          #     OS: ubuntu-latest,
+          #     TARGET: x86_64-unknown-netbsd,
+          #   }
+          - {
+              OS: macos-latest,
+              TARGET: aarch64-apple-darwin,
+            }
+          - { OS: macos-latest,  
+              TARGET: x86_64-apple-darwin,
+            }
+          - {
+              OS: windows-latest,
+              TARGET: aarch64-pc-windows-msvc,
+            }
+          - {
+              OS: windows-latest,
+              TARGET: x86_64-pc-windows-gnu,
+            }
+          - {
+              OS: windows-latest,
+              TARGET: x86_64-pc-windows-msvc,
+            }
+
+    steps:
+      - name: Checkout the repository
+        uses: actions/checkout@v3
+
+      - name: Setup Zig
+        uses: goto-bus-stop/setup-zig@v2
+        with:
+          version: 0.12.0-dev.170+750998eef
+
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Prepare release assets
+        shell: bash
+        run: |
+          mkdir -p ztt/bin/
+          cp {.github/CODEOWNERS,LICENSE,CHANGELOG.md} ztt/
+          echo "${{ github.ref_name }}" > ztt/VERSION
+          for bin in 'ztt'; do
+            if [ "${{ matrix.build.OS }}" = "windows-latest" ]; then
+              bin="${bin}.exe"
+            fi
+            cp "target/${{ matrix.build.TARGET }}/rel-opt/${bin}" ztt/bin/
+          done
+
+      - name: Create release artifacts
+        shell: bash
+        run: |
+          if [ "${{ matrix.build.OS }}" = "windows-latest" ]; then
+            7z a -tzip "ztt-${{ github.ref_name }}-${{ matrix.build.TARGET }}.zip" \
+              ztt/
+            CertUtil -hashfile "ztt-${{ github.ref_name }}-${{ matrix.build.TARGET }}.zip" SHA512 \
+              > ztt-${{ github.ref_name }}-${{ matrix.build.TARGET }}.zip.sha512
+          else
+            tar -czvf ztt-${{ github.ref_name }}-${{ matrix.build.TARGET }}.tar.gz \
+              ztt/
+            shasum -a 512 ztt-${{ github.ref_name }}-${{ matrix.build.TARGET }}.tar.gz \
+              > ztt-${{ github.ref_name }}-${{ matrix.build.TARGET }}.tar.gz.sha512
+          fi
+
+      # - name: Sign the release
+      #   if: matrix.build.OS != 'windows-latest'
+      #   run: |
+      #     echo "${{ secrets.GPG_RELEASE_KEY }}" | base64 --decode > private.key
+      #     echo "${{ secrets.GPG_PASSPHRASE }}" | gpg --pinentry-mode=loopback \
+      #       --passphrase-fd 0 --import private.key
+      #     echo "${{ secrets.GPG_PASSPHRASE }}" | gpg --pinentry-mode=loopback \
+      #       --passphrase-fd 0 --detach-sign \
+      #       ztt-${{ github.ref_name }}-${{ matrix.build.TARGET }}.tar.gz
+
+      - name: Upload the binary releases
+        uses: svenstaro/upload-release-action@v2
+        with:
+          file: "ztt-${{ github.ref_name }}-${{ matrix.build.TARGET }}*"
+          file_glob: true
+          overwrite: true
+          tag: ${{ github.ref }}
+          release_name: "${{ github.ref_name }}"
+          body: ${{ needs.changelog.outputs.release_body }}
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+
+  # publish-crates-io:
+  #   name: Publish on crates.io
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - name: Checkout the repository
+  #       uses: actions/checkout@v3
+  #
+  #     - name: Set up Rust
+  #        uses: dtolnay/rust-toolchain@stable
+  #        with:
+  #          toolchain: ${{ matrix.build.TOOLCHAIN }}
+  #          target: x86_64-unknown-linux-gnu
+  #
+  #     - name: Publish
+  #       run: cargo publish --locked --token ${{ secrets.CARGO_TOKEN }}

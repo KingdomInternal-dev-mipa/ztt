@@ -1,0 +1,13 @@
+# Zig
+zig-cache/
+zig-out/
+/release/
+/debug/
+/build/
+/build-*/
+/docgen_tmp/
+
+# Rust
+target/
+Cargo.lock
+**/*.rs.bk
