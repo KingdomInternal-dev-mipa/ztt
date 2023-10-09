@@ -1,6 +1,6 @@
 #[no_mangle]
 pub extern "C" fn rs_fn() {
-        main();
+    main();
 }
 
 fn main() {
