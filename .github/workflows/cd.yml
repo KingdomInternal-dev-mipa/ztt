@@ -108,6 +108,19 @@ jobs:
       - name: Setup Rust
         uses: dtolnay/rust-toolchain@stable
 
+      # - name: Prepare release assets
+      #   shell: bash
+      #   run: |
+      #     mkdir -p ztt/bin/
+      #     cp {.github/CODEOWNERS,LICENSE,CHANGELOG.md} ztt/
+      #     echo "${{ github.ref_name }}" > ztt/VERSION
+      #     for bin in 'ztt'; do
+      #       if [ "${{ matrix.build.OS }}" = "windows-latest" ]; then
+      #         bin="${bin}.exe"
+      #       fi
+      #       cp "target/${{ matrix.build.TARGET }}/rel-opt/${bin}" ztt/bin/
+      #     done
+
       - name: Prepare release assets
         shell: bash
         run: |
@@ -118,7 +131,7 @@ jobs:
             if [ "${{ matrix.build.OS }}" = "windows-latest" ]; then
               bin="${bin}.exe"
             fi
-            cp "target/${{ matrix.build.TARGET }}/rel-opt/${bin}" ztt/bin/
+            cp "zig-out/bin/${bin}" ztt/bin/
           done
 
       - name: Create release artifacts
