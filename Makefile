@@ -1,5 +1,5 @@
 # Variables
-RUST_TARGET_DIR = target/x86_64-unknown-linux-gnu/rel-opt
+RUST_TARGET_DIR = target/*/rel-opt
 ZIG_TARGET_DIR = zig-out
 RUST_LIB_NAME = ztt
 ZIG_EXEC_NAME = ztt
