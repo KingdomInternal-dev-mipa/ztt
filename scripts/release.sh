@@ -25,7 +25,7 @@ printf "Updated release to ${GREEN}$1${NC}"
 sed -E -i "/^\[package\]$/,/^\[/ s/^(version = \").*\"$/\1${1#v}\"/" Cargo.toml
 
 # update version in build.zig.zon
-sed -E -i "/^\.\{$/,/^\}$/ s/^( *\.version = \").*\"$/\1${1#v}\",/" build.zig.zon
+# sed -E -i "/^\.\{$/,/^\}$/ s/^( *\.version = \").*\"$/\1${1#v}\",/" build.zig.zon
 
 # update changelog
 git cliff --tag "$1" --config cliff.toml >CHANGELOG.md
