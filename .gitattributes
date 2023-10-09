@@ -1,0 +1,3 @@
+*.zig text eol=lf
+*.rs text eol=lf
+scripts/** linguist-vendored
