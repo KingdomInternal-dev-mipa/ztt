@@ -111,6 +111,9 @@ jobs:
       - name: Update Rust to version 1.73.0
         run: rustup update 1.73.0
 
+      - name: Build Rust library
+        run: cargo build --profile rel-opt
+
       - name: Build Zig executable
         run: make all
 
