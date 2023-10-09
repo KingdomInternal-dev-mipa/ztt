@@ -1,6 +1,6 @@
 [package]
 name = "ztt"
-version = "0.3.0"
+version = "0.3.1"
 description = "..."
 authors = ["xTekC"]
 repository = "https://github.com/xTekC/ztt"
