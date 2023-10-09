@@ -1,4 +1,5 @@
 *.zig text eol=lf
 *.rs text eol=lf
-scripts/** linguist-vendored
+# scripts/** linguist-vendored
+**/*.sh linguist-detectable=false
 **/Makefile linguist-detectable=false

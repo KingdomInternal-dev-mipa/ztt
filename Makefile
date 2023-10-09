@@ -1,5 +1,5 @@
 # Variables
-RUST_TARGET_DIR = target/x86_64-unknown-linux-gnu/release
+RUST_TARGET_DIR = target/x86_64-unknown-linux-gnu/rel-opt
 ZIG_TARGET_DIR = zig-out
 RUST_LIB_NAME = ztt
 ZIG_EXEC_NAME = ztt
@@ -10,7 +10,7 @@ all: rust_lib zig_build run ## Default target
 
 rust_lib: ## Build Rust library
 	@mkdir -p $(BUILD_DIR)
-	@cargo build --release
+	@cargo build --profile rel-opt
 	@echo "Rust library built successfully."
 
 zig_build: rust_lib ## Build Zig binary
@@ -59,6 +59,9 @@ c:  ## Clean
 	@rm -rf zig-cache
 	@rm -rf zig-out
 	@echo "Cleaned up successfully."
+
+rel version: ## Create new release
+	sh scripts/release.sh {{ version }}
 
 # Help
 h:

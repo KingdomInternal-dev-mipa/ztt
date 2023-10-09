@@ -21,9 +21,11 @@ NC='\033[0m' # No Color
 
 printf "Updated release to ${GREEN}$1${NC}"
 
-# update version
+# update version in Cargo.toml
 sed -E -i "/^\[package\]$/,/^\[/ s/^(version = \").*\"$/\1${1#v}\"/" Cargo.toml
-cargo build --profile rel-opt
+
+# update version in build.zig.zon
+sed -E -i "/^\.\{$/,/^\}$/ s/^( *\.version = \").*\"$/\1${1#v}\",/" build.zig.zon
 
 # update changelog
 git cliff --tag "$1" --config cliff.toml >CHANGELOG.md
